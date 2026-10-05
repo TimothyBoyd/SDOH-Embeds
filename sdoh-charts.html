@@ -1,0 +1,234 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>SDOH Charts</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Barlow:wght@500;600;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    color-scheme: light;
+    --bg: #f3efe8;
+    --card: #fdfbf7;
+    --ink: #1f2430;
+    --ink-2: #555b66;
+    --ink-3: #8a8f98;
+    --line: #d9d3c8;
+    --neg: #c4614a;
+    --neg-tint: #f8e3dd;
+    --pos: #2b8a6e;
+    --pos-tint: #dcf1e9;
+    --aligned: #2a78d6;
+    --outlier: #eb6834;
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; background: var(--bg); color: var(--ink);
+    font-family: Inter, system-ui, sans-serif; }
+  .wrap { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; padding: 16px; }
+  body.single .wrap { grid-template-columns: 1fr; }
+  @media (max-width: 900px) { .wrap { grid-template-columns: 1fr; } }
+  .panel { background: var(--card); border: 1px solid var(--line); border-radius: 10px;
+    padding: 18px 20px; min-width: 0; }
+  h2 { font-family: Barlow, sans-serif; font-size: 20px; font-weight: 700; margin: 0 0 4px; }
+  .sub { color: var(--ink-2); font-size: 13px; margin: 0 0 14px; }
+
+  /* ---- Cards ---- */
+  .cols { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+  @media (max-width: 520px) { .cols { grid-template-columns: 1fr; } }
+  .col-head { display: flex; align-items: center; gap: 8px; font-size: 12px; font-weight: 600;
+    padding: 6px 10px; border-radius: 6px; margin-bottom: 8px; }
+  .col-head .dot { width: 9px; height: 9px; border-radius: 50%; }
+  .neg .col-head { background: var(--neg-tint); color: #8a3a28; }
+  .neg .dot { background: var(--neg); }
+  .pos .col-head { background: var(--pos-tint); color: #1d5e4b; }
+  .pos .dot { background: var(--pos); }
+  .card { background: #fff; border: 1px solid var(--line); border-left: 5px solid;
+    border-radius: 8px; padding: 10px 12px; margin-bottom: 8px; display: flex;
+    justify-content: space-between; align-items: flex-start; gap: 8px; }
+  .neg .card { border-left-color: var(--neg); }
+  .pos .card { border-left-color: var(--pos); }
+  .card b { display: block; font-size: 14px; }
+  .card span { font-size: 12px; color: var(--ink-2); }
+  .tag { font-size: 11px; font-weight: 600; padding: 2px 8px; border-radius: 999px; white-space: nowrap; }
+  .neg .tag { background: var(--neg-tint); color: #8a3a28; }
+  .pos .tag { background: var(--pos-tint); color: #1d5e4b; }
+  .note { margin-top: 6px; font-size: 12px; color: var(--ink-2); border-top: 1px solid var(--line); padding-top: 10px; }
+
+  /* ---- Scatter ---- */
+  .legend { display: flex; gap: 16px; font-size: 12px; color: var(--ink-2); margin-bottom: 6px; flex-wrap: wrap; }
+  .legend i { display: inline-block; width: 10px; height: 10px; border-radius: 50%; margin-right: 6px; vertical-align: -1px; }
+  .chart-box { position: relative; }
+  svg { width: 100%; height: auto; display: block; overflow: visible; }
+  .grid line { stroke: #ebe6dd; }
+  .axis text { fill: var(--ink-3); font-size: 11px; }
+  .axis-title { fill: var(--ink-2); font-size: 12px; font-weight: 500; }
+  .zero { stroke: #b9b2a5; stroke-dasharray: 4 4; }
+  .fit { stroke: var(--ink); stroke-width: 2; opacity: .7; }
+  .pt { stroke: var(--card); stroke-width: 2; cursor: pointer; }
+  .lbl { font-size: 11px; fill: var(--ink-2); pointer-events: none; }
+  .lbl.out { fill: var(--ink); font-weight: 600; }
+  .stat { font-size: 12px; fill: var(--ink-2); }
+  .tip { position: absolute; pointer-events: none; background: var(--ink); color: #fff;
+    font-size: 12px; padding: 6px 9px; border-radius: 6px; opacity: 0; transition: opacity .1s;
+    white-space: nowrap; transform: translate(-50%, calc(-100% - 12px)); }
+  .src { font-size: 11px; color: var(--ink-3); margin-top: 6px; }
+  details { margin-top: 8px; font-size: 12px; color: var(--ink-2); }
+  table { border-collapse: collapse; margin-top: 6px; }
+  td, th { padding: 3px 10px; text-align: right; border-bottom: 1px solid var(--line); }
+  td:first-child, th:first-child { text-align: left; }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <section class="panel" id="cards">
+    <h2>Selected Social Determinants of Health</h2>
+    <p class="sub">Variables retained from correlation results and used to interpret homelessness-related spatial patterns</p>
+    <div class="cols">
+      <div class="neg" id="negCol"><div class="col-head"><span class="dot"></span>Negative relationship</div></div>
+      <div class="pos" id="posCol"><div class="col-head"><span class="dot"></span>Positive relationship</div></div>
+    </div>
+    <p class="note">Interpretation: positive variables increased with homelessness-related counts; negative variables moved in the opposite direction.</p>
+  </section>
+
+  <section class="panel" id="scatter">
+    <h2>Do 311 and PITC identify similar SDOH relationships?</h2>
+    <p class="sub">Spearman correlations by census tract, 2024</p>
+    <div class="legend">
+      <span><i style="background:var(--aligned)"></i>Same direction in both</span>
+      <span><i style="background:var(--outlier)"></i>Doesn't align cleanly</span>
+      <span><i style="background:var(--ink);border-radius:0;height:2px;width:14px;vertical-align:3px"></i>Linear fit</span>
+    </div>
+    <div class="chart-box">
+      <svg id="svg" viewBox="0 0 560 440" role="img" aria-label="Scatter plot of 311 versus PITC Spearman correlations"></svg>
+      <div class="tip" id="tip"></div>
+    </div>
+    <p class="src">Source: UCSD Homelessness Hub; ACS 2014–2024; 311 Data</p>
+    <details><summary>View data table</summary><table id="tbl"></table></details>
+  </section>
+
+</div>
+<script>
+/* ===== EDIT DATA HERE ===== */
+const CARDS = {
+  neg: [
+    ["Married", "Individuals who are married"],
+    ["Children", "Households with children under age 18"],
+    ["Age 65+", "Total population age 65 and older"],
+    ["Median Income", "Median household income"],
+    ["Owner", "Individuals living in owner-occupied housing"],
+  ],
+  pos: [
+    ["Black", "Total Black population"],
+    ["Hispanic", "Total Hispanic population, including White Hispanic"],
+    ["Age 25–44", "Total population age 25 to 44"],
+    ["Poverty", "Individuals living below the poverty line"],
+    ["Renter", "Individuals living in renter-occupied housing"],
+  ],
+};
+// [label, 311 correlation (x), PITC correlation (y), outlier?, label position]
+// Values approximated from the slide; replace with exact numbers.
+// Label position: "r" (default), "l", "t", "b"
+const POINTS = [
+  ["25–44",    0.50,  0.44],
+  ["5–14",    -0.45, -0.21],
+  ["65+",     -0.27, -0.21],
+  ["Children",-0.48, -0.22, false, "b"],
+  ["Asian",   -0.47, -0.14, true, "t"],
+  ["Black",    0.31,  0.30],
+  ["Hispanic", 0.22,  0.29, false, "l"],
+  ["White",    0.08, -0.16, true],
+  ["Renter",   0.61,  0.53],
+  ["Owner",   -0.43, -0.43],
+  ["Poverty", -0.04, -0.11],
+  ["Insured", -0.51, -0.36],
+  ["Married",  0.21, -0.49, true],
+];
+// Fit line shown on the chart. Set to null to compute it from POINTS instead.
+const FIT = { slope: 0.89, intercept: -0.02, r2: 0.76 };
+/* ========================== */
+
+// ?view=cards or ?view=scatter shows just one panel (for separate embeds)
+const view = new URLSearchParams(location.search).get("view");
+if (view === "cards") { document.getElementById("scatter").remove(); document.body.classList.add("single"); }
+if (view === "scatter") { document.getElementById("cards").remove(); document.body.classList.add("single"); }
+
+// Cards
+for (const side of ["neg", "pos"]) {
+  const col = document.getElementById(side + "Col");
+  if (!col) continue;
+  for (const [name, desc] of CARDS[side]) {
+    const d = document.createElement("div");
+    d.className = "card";
+    d.innerHTML = `<div><b>${name}</b><span>${desc}</span></div><span class="tag">${side === "neg" ? "Negative" : "Positive"}</span>`;
+    col.appendChild(d);
+  }
+}
+
+// Scatter
+const svg = document.getElementById("svg");
+if (svg) {
+  const W = 560, H = 440, m = { t: 14, r: 16, b: 46, l: 52 };
+  const lo = -0.6, hi = 0.7, ylo = -0.6, yhi = 0.6;
+  const X = v => m.l + (v - lo) / (hi - lo) * (W - m.l - m.r);
+  const Y = v => H - m.b - (v - ylo) / (yhi - ylo) * (H - m.t - m.b);
+  const ns = "http://www.w3.org/2000/svg";
+  const el = (tag, attrs, parent = svg, text) => {
+    const e = document.createElementNS(ns, tag);
+    for (const k in attrs) e.setAttribute(k, attrs[k]);
+    if (text != null) e.textContent = text;
+    parent.appendChild(e); return e;
+  };
+
+  const g = el("g", { class: "grid" }), ax = el("g", { class: "axis" });
+  for (let v = -0.6; v <= 0.61; v += 0.2) {
+    const t = Math.round(v * 10) / 10;
+    el("line", { x1: X(t), x2: X(t), y1: m.t, y2: H - m.b }, g);
+    el("text", { x: X(t), y: H - m.b + 18, "text-anchor": "middle" }, ax, t.toFixed(1));
+    el("line", { x1: m.l, x2: W - m.r, y1: Y(t), y2: Y(t) }, g);
+    el("text", { x: m.l - 8, y: Y(t) + 4, "text-anchor": "end" }, ax, t.toFixed(1));
+  }
+  el("line", { class: "zero", x1: X(0), x2: X(0), y1: m.t, y2: H - m.b });
+  el("line", { class: "zero", x1: m.l, x2: W - m.r, y1: Y(0), y2: Y(0) });
+  el("text", { class: "axis-title", x: (m.l + W - m.r) / 2, y: H - 8, "text-anchor": "middle" }, svg, "311 correlation (tract)");
+  el("text", { class: "axis-title", transform: `translate(14 ${(m.t + H - m.b) / 2}) rotate(-90)`, "text-anchor": "middle" }, svg, "PITC correlation (tract)");
+
+  // Least-squares fit + R²
+  const n = POINTS.length, xs = POINTS.map(p => p[1]), ys = POINTS.map(p => p[2]);
+  const mx = xs.reduce((a, b) => a + b) / n, my = ys.reduce((a, b) => a + b) / n;
+  let sxy = 0, sxx = 0, syy = 0;
+  xs.forEach((x, i) => { sxy += (x - mx) * (ys[i] - my); sxx += (x - mx) ** 2; syy += (ys[i] - my) ** 2; });
+  const slope = FIT ? FIT.slope : sxy / sxx, icpt = FIT ? FIT.intercept : my - slope * mx,
+        r2 = FIT ? FIT.r2 : sxy * sxy / (sxx * syy);
+  const x0 = Math.max(lo, (ylo - icpt) / slope), x1 = Math.min(hi, (yhi - icpt) / slope);
+  el("line", { class: "fit", x1: X(x0), y1: Y(slope * x0 + icpt), x2: X(x1), y2: Y(slope * x1 + icpt) });
+  el("text", { class: "stat", x: m.l + 8, y: m.t + 14 }, svg,
+     `y = ${slope.toFixed(2)}x ${icpt < 0 ? "−" : "+"} ${Math.abs(icpt).toFixed(2)}  ·  R² = ${r2.toFixed(2)}`);
+
+  // Points + labels
+  const tip = document.getElementById("tip");
+  for (const [name, x, y, out, pos = "r"] of POINTS) {
+    const c = el("circle", { class: "pt", cx: X(x), cy: Y(y), r: 6,
+      fill: out ? "var(--outlier)" : "var(--aligned)" });
+    const off = { r: [9, 4, "start"], l: [-9, 4, "end"], t: [0, -10, "middle"], b: [0, 18, "middle"] }[pos];
+    el("text", { class: "lbl" + (out ? " out" : ""), x: X(x) + off[0], y: Y(y) + off[1], "text-anchor": off[2] }, svg, name);
+    const show = () => {
+      const box = svg.getBoundingClientRect(), k = box.width / W;
+      tip.innerHTML = `<b>${name}</b><br>311: ${x.toFixed(2)} · PITC: ${y.toFixed(2)}`;
+      tip.style.left = X(x) * k + "px"; tip.style.top = Y(y) * k + "px"; tip.style.opacity = 1;
+      c.setAttribute("r", 8);
+    };
+    const hide = () => { tip.style.opacity = 0; c.setAttribute("r", 6); };
+    c.addEventListener("mouseenter", show); c.addEventListener("mouseleave", hide);
+    c.addEventListener("touchstart", show, { passive: true });
+  }
+
+  // Data table
+  document.getElementById("tbl").innerHTML =
+    "<tr><th>Variable</th><th>311</th><th>PITC</th></tr>" +
+    POINTS.map(p => `<tr><td>${p[0]}</td><td>${p[1].toFixed(2)}</td><td>${p[2].toFixed(2)}</td></tr>`).join("");
+}
+</script>
+</body>
+</html>
