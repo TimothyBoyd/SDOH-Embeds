@@ -25,38 +25,39 @@
   * { box-sizing: border-box; }
   html, body { margin: 0; background: var(--bg); color: var(--ink);
     font-family: Inter, system-ui, sans-serif; }
-  .wrap { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; padding: 16px; }
+  .wrap { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; padding: 10px; }
   body.single .wrap { grid-template-columns: 1fr; }
   @media (max-width: 900px) { .wrap { grid-template-columns: 1fr; } }
   .panel { background: var(--card); border: 1px solid var(--line); border-radius: 10px;
-    padding: 18px 20px; min-width: 0; }
-  h2 { font-family: Barlow, sans-serif; font-size: 20px; font-weight: 700; margin: 0 0 4px; }
-  .sub { color: var(--ink-2); font-size: 13px; margin: 0 0 14px; }
+    padding: 12px 16px; min-width: 0; }
+  h2 { font-family: Barlow, sans-serif; font-size: 17px; font-weight: 700; margin: 0 0 2px; }
+  .sub { color: var(--ink-2); font-size: 12px; margin: 0 0 8px; }
 
   /* ---- Cards ---- */
-  .cols { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+  .cols { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
   @media (max-width: 520px) { .cols { grid-template-columns: 1fr; } }
   .col-head { display: flex; align-items: center; gap: 8px; font-size: 12px; font-weight: 600;
-    padding: 6px 10px; border-radius: 6px; margin-bottom: 8px; }
+    padding: 4px 10px; border-radius: 6px; margin-bottom: 6px; }
   .col-head .dot { width: 9px; height: 9px; border-radius: 50%; }
   .neg .col-head { background: var(--neg-tint); color: #8a3a28; }
   .neg .dot { background: var(--neg); }
   .pos .col-head { background: var(--pos-tint); color: #1d5e4b; }
   .pos .dot { background: var(--pos); }
   .card { background: #fff; border: 1px solid var(--line); border-left: 5px solid;
-    border-radius: 8px; padding: 10px 12px; margin-bottom: 8px; display: flex;
-    justify-content: space-between; align-items: flex-start; gap: 8px; }
+    border-radius: 7px; padding: 4px 10px; margin-bottom: 5px; display: flex;
+    flex-direction: column; gap: 1px; }
+  .card .top { display: flex; justify-content: space-between; align-items: center; gap: 8px; }
   .neg .card { border-left-color: var(--neg); }
   .pos .card { border-left-color: var(--pos); }
-  .card b { display: block; font-size: 14px; }
-  .card span { font-size: 12px; color: var(--ink-2); }
-  .tag { font-size: 11px; font-weight: 600; padding: 2px 8px; border-radius: 999px; white-space: nowrap; }
+  .card b { display: block; font-size: 13px; }
+  .card > span { font-size: 11px; color: var(--ink-2); line-height: 1.3; }
+  .tag { font-size: 10px; font-weight: 600; padding: 2px 8px; border-radius: 999px; white-space: nowrap; }
   .neg .tag { background: var(--neg-tint); color: #8a3a28; }
   .pos .tag { background: var(--pos-tint); color: #1d5e4b; }
-  .note { margin-top: 6px; font-size: 12px; color: var(--ink-2); border-top: 1px solid var(--line); padding-top: 10px; }
+  .note { margin: 4px 0 0; font-size: 11px; color: var(--ink-2); border-top: 1px solid var(--line); padding-top: 6px; }
 
   /* ---- Scatter ---- */
-  .legend { display: flex; gap: 16px; font-size: 12px; color: var(--ink-2); margin-bottom: 6px; flex-wrap: wrap; }
+  .legend { display: flex; gap: 16px; font-size: 11px; color: var(--ink-2); margin-bottom: 2px; flex-wrap: wrap; }
   .legend i { display: inline-block; width: 10px; height: 10px; border-radius: 50%; margin-right: 6px; vertical-align: -1px; }
   .chart-box { position: relative; }
   svg { width: 100%; height: auto; display: block; overflow: visible; }
@@ -72,8 +73,8 @@
   .tip { position: absolute; pointer-events: none; background: var(--ink); color: #fff;
     font-size: 12px; padding: 6px 9px; border-radius: 6px; opacity: 0; transition: opacity .1s;
     white-space: nowrap; transform: translate(-50%, calc(-100% - 12px)); }
-  .src { font-size: 11px; color: var(--ink-3); margin-top: 6px; }
-  details { margin-top: 8px; font-size: 12px; color: var(--ink-2); }
+  .src { font-size: 10px; color: var(--ink-3); margin: 2px 0 0; display: flex; justify-content: space-between; gap: 8px; flex-wrap: wrap; }
+  details { font-size: 11px; color: var(--ink-2); }
   table { border-collapse: collapse; margin-top: 6px; }
   td, th { padding: 3px 10px; text-align: right; border-bottom: 1px solid var(--line); }
   td:first-child, th:first-child { text-align: left; }
@@ -101,11 +102,11 @@
       <span><i style="background:var(--ink);border-radius:0;height:2px;width:14px;vertical-align:3px"></i>Linear fit</span>
     </div>
     <div class="chart-box">
-      <svg id="svg" viewBox="0 0 560 440" role="img" aria-label="Scatter plot of 311 versus PITC Spearman correlations"></svg>
+      <svg id="svg" viewBox="0 0 560 290" role="img" aria-label="Scatter plot of 311 versus PITC Spearman correlations"></svg>
       <div class="tip" id="tip"></div>
     </div>
-    <p class="src">Source: UCSD Homelessness Hub; ACS 2014–2024; 311 Data</p>
-    <details><summary>View data table</summary><table id="tbl"></table></details>
+    <div class="src"><span>Source: UCSD Homelessness Hub; ACS 2014–2024; 311 Data</span>
+      <details><summary>View data table</summary><table id="tbl"></table></details></div>
   </section>
 
 </div>
@@ -161,7 +162,7 @@ for (const side of ["neg", "pos"]) {
   for (const [name, desc] of CARDS[side]) {
     const d = document.createElement("div");
     d.className = "card";
-    d.innerHTML = `<div><b>${name}</b><span>${desc}</span></div><span class="tag">${side === "neg" ? "Negative" : "Positive"}</span>`;
+    d.innerHTML = `<div class="top"><b>${name}</b><span class="tag">${side === "neg" ? "Negative" : "Positive"}</span></div><span>${desc}</span>`;
     col.appendChild(d);
   }
 }
@@ -169,7 +170,7 @@ for (const side of ["neg", "pos"]) {
 // Scatter
 const svg = document.getElementById("svg");
 if (svg) {
-  const W = 560, H = 440, m = { t: 14, r: 16, b: 46, l: 52 };
+  const W = 560, H = 290, m = { t: 10, r: 16, b: 38, l: 46 };
   const lo = -0.6, hi = 0.7, ylo = -0.6, yhi = 0.6;
   const X = v => m.l + (v - lo) / (hi - lo) * (W - m.l - m.r);
   const Y = v => H - m.b - (v - ylo) / (yhi - ylo) * (H - m.t - m.b);
@@ -185,14 +186,14 @@ if (svg) {
   for (let v = -0.6; v <= 0.61; v += 0.2) {
     const t = Math.round(v * 10) / 10;
     el("line", { x1: X(t), x2: X(t), y1: m.t, y2: H - m.b }, g);
-    el("text", { x: X(t), y: H - m.b + 18, "text-anchor": "middle" }, ax, t.toFixed(1));
+    el("text", { x: X(t), y: H - m.b + 15, "text-anchor": "middle" }, ax, t.toFixed(1));
     el("line", { x1: m.l, x2: W - m.r, y1: Y(t), y2: Y(t) }, g);
     el("text", { x: m.l - 8, y: Y(t) + 4, "text-anchor": "end" }, ax, t.toFixed(1));
   }
   el("line", { class: "zero", x1: X(0), x2: X(0), y1: m.t, y2: H - m.b });
   el("line", { class: "zero", x1: m.l, x2: W - m.r, y1: Y(0), y2: Y(0) });
-  el("text", { class: "axis-title", x: (m.l + W - m.r) / 2, y: H - 8, "text-anchor": "middle" }, svg, "311 correlation (tract)");
-  el("text", { class: "axis-title", transform: `translate(14 ${(m.t + H - m.b) / 2}) rotate(-90)`, "text-anchor": "middle" }, svg, "PITC correlation (tract)");
+  el("text", { class: "axis-title", x: (m.l + W - m.r) / 2, y: H - 4, "text-anchor": "middle" }, svg, "311 correlation (tract)");
+  el("text", { class: "axis-title", transform: `translate(12 ${(m.t + H - m.b) / 2}) rotate(-90)`, "text-anchor": "middle" }, svg, "PITC correlation (tract)");
 
   // Least-squares fit + R²
   const n = POINTS.length, xs = POINTS.map(p => p[1]), ys = POINTS.map(p => p[2]);
